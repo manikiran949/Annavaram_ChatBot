@@ -6,7 +6,7 @@ from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain_community.llms import OpenAI
 
-OPENAI_API_KEY = "sk-None-hvfTell8ftyI3Q6x0dBBT3BlbkFJRR7Ru0ydE7T78hQ86U51"
+OPENAI_API_KEY = ""
 
 pdfreader = PdfReader(r'C:\cpp\coding\Vetaron\data\annavaram.pdf')
 
