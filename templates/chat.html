@@ -90,6 +90,9 @@
                                     autocomplete="off"
                                     maxlength="500"
                                 >
+                                <button type="button" class="mic-button" id="micButton" title="Click to speak">
+                                    <i class="fas fa-microphone" id="micIcon"></i>
+                                </button>
                                 <button type="submit" class="send-button">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
@@ -140,6 +143,82 @@
                 $("#messageInput").val(message);
                 sendMessage();
             });
+
+            // Speech Recognition Setup
+            let recognition = null;
+            let isListening = false;
+
+            // Check if browser supports speech recognition
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                // Configure speech recognition
+                recognition.lang = 'en-US'; // You can change to 'te-IN' for Telugu
+                recognition.continuous = false;
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                // Speech recognition event handlers
+                recognition.onstart = function() {
+                    isListening = true;
+                    $("#micIcon").removeClass("fa-microphone").addClass("fa-stop");
+                    $("#micButton").addClass("listening");
+                    $("#messageInput").attr("placeholder", "Listening... Speak now!");
+                };
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    $("#messageInput").val(transcript);
+                    $("#messageInput").focus();
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    let errorMessage = "Speech recognition error. ";
+                    
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage += "No speech detected. Please try again.";
+                            break;
+                        case 'audio-capture':
+                            errorMessage += "Microphone not found. Please check your microphone.";
+                            break;
+                        case 'not-allowed':
+                            errorMessage += "Microphone access denied. Please allow microphone access.";
+                            break;
+                        default:
+                            errorMessage += "Please try again.";
+                    }
+                    
+                    // Show error message temporarily
+                    const originalPlaceholder = $("#messageInput").attr("placeholder");
+                    $("#messageInput").attr("placeholder", errorMessage);
+                    setTimeout(() => {
+                        $("#messageInput").attr("placeholder", "Ask about temple timings, darshan, history...");
+                    }, 3000);
+                };
+
+                recognition.onend = function() {
+                    isListening = false;
+                    $("#micIcon").removeClass("fa-stop").addClass("fa-microphone");
+                    $("#micButton").removeClass("listening");
+                    $("#messageInput").attr("placeholder", "Ask about temple timings, darshan, history...");
+                };
+
+                // Microphone button click handler
+                $("#micButton").on("click", function() {
+                    if (isListening) {
+                        recognition.stop();
+                    } else {
+                        recognition.start();
+                    }
+                });
+            } else {
+                // Hide mic button if speech recognition is not supported
+                $("#micButton").hide();
+                console.warn("Speech recognition not supported in this browser");
+            }
 
             function sendMessage() {
                 const messageText = $("#messageInput").val().trim();
