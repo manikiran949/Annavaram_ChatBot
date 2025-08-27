@@ -4,9 +4,19 @@ from langchain_openai import OpenAIEmbeddings, OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
+import os
+from dotenv import load_dotenv
 
-# Replace with your actual OpenAI API key
-OPENAI_API_KEY = ""
+# Load environment variables from .env file
+load_dotenv()
+
+# Get OpenAI API key from environment variable
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+if not OPENAI_API_KEY:
+    print("Error: OPENAI_API_KEY not found in environment variables!")
+    print("Please set your OpenAI API key in the .env file")
+    exit(1)
 
 # Initialize Flask app
 app = Flask(__name__)
